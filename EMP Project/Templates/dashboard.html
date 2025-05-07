@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Organizer Dashboard - Event Management Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Organizer Dashboard</h2>
+            <p class="text-muted">Welcome back, {{ current_user.username }}!</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Events</h5>
+                    <h2 class="card-text">{{ total_events }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Registrations</h5>
+                    <h2 class="card-text">{{ total_registrations }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <h2 class="card-text">${{ "%.2f"|format(total_revenue) }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Events -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Upcoming Events</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_events %}
+                    <div class="list-group">
+                        {% for event in upcoming_events %}
+                        <a href="{{ url_for('view_event', event_id=event.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ event.title }}</h6>
+                                <small>{{ event.start_time.strftime('%B %d, %Y') }}</small>
+                            </div>
+                            <p class="mb-1">{{ event.venue }}</p>
+                            <small>{{ event.attendees|length }} registrations</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No upcoming events</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Registrations -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Registrations</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_registrations %}
+                    <div class="list-group">
+                        {% for registration in recent_registrations %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ registration.name }}</h6>
+                                <small>{{ registration.registration_date.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <p class="mb-1">{{ registration.event.title }}</p>
+                            <small>
+                                <span class="badge {% if registration.status == 'registered' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ registration.status }}
+                                </span>
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No recent registrations</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Ticket Sales -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Ticket Sales</h5>
+                </div>
+                <div class="card-body">
+                    {% if ticket_sales %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket Type</th>
+                                    <th>Sales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket_type, sales in ticket_sales.items() %}
+                                <tr>
+                                    <td>{{ ticket_type }}</td>
+                                    <td>{{ sales }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No ticket sales data</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Status -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Registration Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="card bg-success text-white mb-3">
+                                <div class="card-body text-center">
+                                    <h5>Registered</h5>
+                                    <h3>{{ status_counts.registered }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-warning text-white mb-3">
+                                <div class="card-body text-center">
+                                    <h5>Waitlisted</h5>
+                                    <h3>{{ status_counts.waitlisted }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

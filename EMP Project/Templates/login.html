@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Event Management Platform{% endblock %}
+
+{% block styles %}
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transform-style: preserve-3d;
+        transition: transform 0.5s ease;
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        color: white;
+    }
+
+    .login-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #00ff88;
+    }
+
+    .login-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        color: white;
+        font-size: 1.1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .form-label {
+        position: absolute;
+        left: 1.2rem;
+        top: 1rem;
+        color: rgba(255, 255, 255, 0.6);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        font-size: 1.1rem;
+    }
+
+    .form-control:focus + .form-label,
+    .form-control:not(:placeholder-shown) + .form-label {
+        top: -0.5rem;
+        left: 1rem;
+        font-size: 0.9rem;
+        color: #00ff88;
+        background: rgba(26, 26, 26, 0.9);
+        padding: 0 0.5rem;
+        border-radius: 5px;
+    }
+
+    .btn-login {
+        background: linear-gradient(45deg, #00ff88, #00b8ff);
+        border: none;
+        border-radius: 10px;
+        padding: 1rem;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 2rem;
+        color: white;
+    }
+
+    .register-link a {
+        color: #00ff88;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .register-link a:hover {
+        color: #00b8ff;
+    }
+
+    .error-message {
+        color: #ff4444;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-message i {
+        font-size: 1rem;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        margin-top: 1rem;
+    }
+
+    .form-check-input {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    @media (max-width: 576px) {
+        .login-card {
+            padding: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in to continue to your account</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.email(class="form-control", placeholder=" ", autocomplete="email") }}
+                <label class="form-label">Email Address</label>
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        <i class="bi bi-exclamation-circle"></i>
+                        {{ form.email.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.password(class="form-control", placeholder=" ", autocomplete="current-password") }}
+                <label class="form-label">Password</label>
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        <i class="bi bi-exclamation-circle"></i>
+                        {{ form.password.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-check">
+                {{ form.remember(class="form-check-input") }}
+                {{ form.remember.label(class="form-check-label") }}
+            </div>
+            
+            {{ form.submit(class="btn-login") }}
+        </form>
+        
+        <div class="register-link">
+            <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

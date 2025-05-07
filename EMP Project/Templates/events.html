@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}Events - Event Management Platform{% endblock %}
+
+{% block styles %}
+<style>
+    /* Base styles */
+    .events-container {
+        padding: 2rem 0;
+        perspective: 1000px;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+
+    /* Header styles */
+    .events-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        transform-style: preserve-3d;
+        animation: fadeInDown 1s ease;
+        padding: 0 1rem;
+    }
+
+    .events-header h1 {
+        font-size: clamp(2rem, 5vw, 2.5rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #00ff88, #00b8ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: fadeInUp 1s ease;
+        transform: translateZ(100px);
+        text-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        letter-spacing: 2px;
+        line-height: 1.2;
+    }
+
+    .events-header p {
+        font-size: clamp(1rem, 3vw, 1.2rem);
+        color: #718096;
+        max-width: 600px;
+        margin: 0 auto;
+        animation: fadeInUp 1s ease 0.2s;
+        animation-fill-mode: both;
+        transform: translateZ(60px);
+    }
+
+    /* Grid styles */
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+        transform-style: preserve-3d;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Card styles */
+    .event-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+        animation: fadeInUp 0.6s ease;
+        animation-fill-mode: both;
+        will-change: transform;
+        position: relative;
+    }
+
+    .event-card:hover {
+        transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Image styles */
+    .event-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        background: #f8f9fa;
+    }
+
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+        will-change: transform;
+    }
+
+    .event-card:hover .event-image img {
+        transform: scale(1.1);
+    }
+
+    .event-date {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        color: #2d3748;
+        transform: translateZ(20px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+
+    /* Content styles */
+    .event-content {
+        padding: 1.5rem;
+        transform-style: preserve-3d;
+    }
+
+    .event-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #2d3748;
+        transform: translateZ(30px);
+        line-height: 1.3;
+    }
+
+    .event-details {
+        color: #718096;
+        margin-bottom: 1rem;
+        transform: translateZ(20px);
+    }
+
+    .event-details p {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .event-details i {
+        color: #4299e1;
+        width: 20px;
+        text-align: center;
+    }
+
+    .event-description {
+        color: #4a5568;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        transform: translateZ(10px);
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Button styles */
+    .event-actions {
+        display: flex;
+        gap: 1rem;
+        transform: translateZ(40px);
+    }
+
+    .btn-view, .btn-edit, .btn-delete {
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        text-align: center;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .btn-view {
+        background: #4299e1;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: #3182ce;
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background: #48bb78;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #38a169;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: #f56565;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #e53e3e;
+        transform: translateY(-2px);
+    }
+
+    /* Create event button */
+    .create-event-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: linear-gradient(45deg, #00ff88, #00b8ff);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+        animation: fadeInUp 1s ease 0.4s;
+        animation-fill-mode: both;
+        z-index: 1000;
+    }
+
+    .create-event-btn:hover {
+        transform: translateY(-5px) rotateX(10deg);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .create-event-btn i {
+        margin-right: 0.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Staggered animations */
+    .event-card:nth-child(1) { animation-delay: 0.1s; }
+    .event-card:nth-child(2) { animation-delay: 0.2s; }
+    .event-card:nth-child(3) { animation-delay: 0.3s; }
+    .event-card:nth-child(4) { animation-delay: 0.4s; }
+    .event-card:nth-child(5) { animation-delay: 0.5s; }
+    .event-card:nth-child(6) { animation-delay: 0.6s; }
+
+    /* No events state */
+    .no-events {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transform-style: preserve-3d;
+        animation: fadeInUp 1s ease;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .no-events h3 {
+        font-size: 1.5rem;
+        color: #2d3748;
+        margin-bottom: 1rem;
+        transform: translateZ(30px);
+    }
+
+    .no-events p {
+        color: #718096;
+        margin-bottom: 1.5rem;
+        transform: translateZ(20px);
+    }
+
+    .btn-create {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(45deg, #00ff88, #00b8ff);
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        transform: translateZ(40px);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px) translateZ(50px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Loading state */
+    .loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* Error state */
+    .error-message {
+        color: #dc3545;
+        background: rgba(220, 53, 69, 0.1);
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 1rem auto;
+        max-width: 600px;
+        text-align: center;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .events-container {
+            padding: 1rem;
+        }
+
+        .events-header {
+            margin-bottom: 2rem;
+        }
+
+        .events-grid {
+            gap: 1.5rem;
+            padding: 0.5rem;
+        }
+
+        .event-card {
+            margin-bottom: 1rem;
+        }
+
+        .event-actions {
+            flex-direction: column;
+        }
+
+        .create-event-btn {
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="events-container">
+    <div class="events-header">
+        <h1>Upcoming Events</h1>
+        <p>Discover and join exciting events in your area</p>
+    </div>
+
+    {% if events %}
+    <div class="events-grid">
+        {% for event in events %}
+        <div class="event-card" data-event-id="{{ event.id }}">
+            <div class="event-image">
+                <img src="{{ event.image_url or url_for('static', filename='images/default-event.jpg') }}" 
+                     alt="{{ event.title }}"
+                     loading="lazy"
+                     data-fallback="{{ url_for('static', filename='images/default-event.jpg') }}">
+                <div class="event-date">
+                    {{ event.start_time.strftime('%b %d') }}
+                </div>
+            </div>
+            <div class="event-content">
+                <h3 class="event-title">{{ event.title }}</h3>
+                <div class="event-details">
+                    <p><i class="fas fa-clock" aria-hidden="true"></i> {{ event.start_time.strftime('%I:%M %p') }}</p>
+                    <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ event.venue }}</p>
+                    {% if event.max_attendees %}
+                    <p><i class="fas fa-users" aria-hidden="true"></i> {{ event.max_attendees }} spots</p>
+                    {% endif %}
+                </div>
+                <p class="event-description">{{ event.description[:150] }}{% if event.description|length > 150 %}...{% endif %}</p>
+                <div class="event-actions">
+                    <a href="{{ url_for('view_event', event_id=event.id) }}" class="btn-view" aria-label="View details for {{ event.title }}">View Details</a>
+                    {% if current_user.is_authenticated and current_user.id == event.organizer_id %}
+                    <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn-edit" aria-label="Edit {{ event.title }}">Edit</a>
+                    <a href="{{ url_for('delete_event', event_id=event.id) }}" 
+                       class="btn-delete" 
+                       onclick="return confirm('Are you sure you want to delete this event?')"
+                       aria-label="Delete {{ event.title }}">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-events">
+        <h3>No Events Found</h3>
+        <p>There are no upcoming events at the moment.</p>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('create_event') }}" class="btn-create">Create Your First Event</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('create_event') }}" class="create-event-btn" aria-label="Create new event">
+        <i class="fas fa-plus" aria-hidden="true"></i> Create Event
+    </a>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+    // Handle image loading errors
+    document.querySelectorAll('.event-image img').forEach(img => {
+        img.addEventListener('error', function() {
+            const fallbackSrc = this.getAttribute('data-fallback');
+            if (fallbackSrc) {
+                this.src = fallbackSrc;
+            }
+        });
+    });
+
+    // Add loading state to buttons
+    document.querySelectorAll('.btn-view, .btn-edit, .btn-delete').forEach(button => {
+        button.addEventListener('click', function() {
+            this.classList.add('loading');
+        });
+    });
+
+    // Handle delete confirmation
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to delete this event?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

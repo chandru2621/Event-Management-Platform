@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - {{ event.title }}{% endblock %}
+
+{% block styles %}
+<style>
+    .payment-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .payment-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .payment-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2d3748;
+        margin: 1rem 0;
+    }
+
+    .payment-methods {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .payment-methods {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .payment-method-card {
+        padding: 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .payment-method-card:hover {
+        border-color: #4299e1;
+        transform: translateY(-2px);
+    }
+
+    .payment-method-card.selected {
+        border-color: #4299e1;
+        background-color: #ebf8ff;
+    }
+
+    .payment-method-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .payment-method-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .payment-method-description {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    #card-payment-form {
+        margin: 2rem 0;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .card-form-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .card-form-header h3 {
+        font-size: 1.25rem;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-form-header p {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    .card-input-container {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-input-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+        font-weight: 500;
+    }
+
+    #card-element {
+        padding: 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    #card-element:focus {
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    #card-element.StripeElement--focus {
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    #card-element.StripeElement--invalid {
+        border-color: #e53e3e;
+    }
+
+    #card-errors {
+        color: #e53e3e;
+        margin-top: 0.75rem;
+        font-size: 0.9rem;
+        padding: 0.75rem;
+        background: #fff5f5;
+        border-radius: 6px;
+        border: 1px solid #feb2b2;
+    }
+
+    .card-icons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .card-icon {
+        width: 40px;
+        height: 25px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .visa-icon {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="%231A1F71" d="M45 35H3l2.25-14h39.5L45 35z"/><path fill="%23F7B600" d="M18.5 29l2.5-14h5l-2.5 14h-5z"/></svg>');
+    }
+
+    .mastercard-icon {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="%23FF5F00" d="M24 35h-8l2-14h8l-2 14z"/><path fill="%23EB001B" d="M24 35h-8l2-14h8l-2 14z"/><path fill="%23F79E1B" d="M24 35h-8l2-14h8l-2 14z"/></svg>');
+    }
+
+    .amex-icon {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="%230066CC" d="M45 35H3l2.25-14h39.5L45 35z"/><path fill="%23FFFFFF" d="M24 29l-4-14h5l4 14h-5z"/></svg>');
+    }
+
+    .payment-button {
+        width: 100%;
+        padding: 1rem;
+        background: #4299e1;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .payment-button:hover {
+        background: #3182ce;
+        transform: translateY(-1px);
+    }
+
+    .payment-button:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+    }
+
+    .payment-summary {
+        background: #f7fafc;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .payment-summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .payment-summary-total {
+        font-weight: bold;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .onspot-payment-form {
+        display: none;
+        margin: 2rem 0;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .onspot-payment-form.active {
+        display: block;
+    }
+
+    .onspot-payment-input {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+    }
+
+    .onspot-payment-input:focus {
+        border-color: #4299e1;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin-left: 10px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-header">
+        <h1>Complete Your Payment</h1>
+        <p>Event: {{ event.title }}</p>
+        <div class="payment-amount">
+            {{ currency }} {{ "%.2f"|format(amount) }}
+        </div>
+    </div>
+
+    <div class="payment-summary">
+        <div class="payment-summary-item">
+            <span>Ticket Type:</span>
+            <span>{{ ticket_type.name }}</span>
+        </div>
+        <div class="payment-summary-item">
+            <span>Quantity:</span>
+            <span>1</span>
+        </div>
+        {% if promo_code %}
+        <div class="payment-summary-item">
+            <span>Discount:</span>
+            <span>-{{ currency }} {{ "%.2f"|format(discount_amount) }}</span>
+        </div>
+        {% endif %}
+        <div class="payment-summary-item payment-summary-total">
+            <span>Total:</span>
+            <span>{{ currency }} {{ "%.2f"|format(amount) }}</span>
+        </div>
+    </div>
+
+    <div class="payment-methods">
+        <div class="payment-method-card" id="card-payment">
+            <div class="payment-method-icon">💳</div>
+            <div class="payment-method-title">Credit/Debit Card</div>
+            <div class="payment-method-description">Pay securely with your card</div>
+        </div>
+        <div class="payment-method-card" id="onspot-payment">
+            <div class="payment-method-icon">💰</div>
+            <div class="payment-method-title">On-Spot Payment</div>
+            <div class="payment-method-description">Pay at the venue</div>
+        </div>
+    </div>
+
+    <div id="card-payment-form">
+        <div class="card-form-header">
+            <h3>Enter Card Details</h3>
+            <p>Your payment information is secure and encrypted</p>
+        </div>
+        <div class="card-input-container">
+            <label class="card-input-label">Card Number</label>
+            <div id="card-element"></div>
+            <div class="card-icons">
+                <div class="card-icon visa-icon"></div>
+                <div class="card-icon mastercard-icon"></div>
+                <div class="card-icon amex-icon"></div>
+            </div>
+        </div>
+        <div id="card-errors" role="alert"></div>
+    </div>
+
+    <div class="onspot-payment-form" id="onspot-payment-form">
+        <h3>On-Spot Payment Details</h3>
+        <p>You can pay at the venue using cash or card. Please bring a valid ID and the confirmation email.</p>
+        <div class="payment-summary">
+            <p><strong>Payment Instructions:</strong></p>
+            <ul>
+                <li>Arrive 30 minutes before the event</li>
+                <li>Bring a valid government-issued ID</li>
+                <li>Show your confirmation email</li>
+                <li>Pay the exact amount at the registration desk</li>
+            </ul>
+        </div>
+    </div>
+
+    <button id="submit-payment" class="payment-button" disabled>
+        <span id="button-text">Pay Now</span>
+        <span id="spinner" class="spinner hidden"></span>
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+    const card = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#32325d',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '::placeholder': {
+                    color: '#aab7c4'
+                },
+                ':-webkit-autofill': {
+                    color: '#32325d'
+                }
+            },
+            invalid: {
+                color: '#e53e3e',
+                iconColor: '#e53e3e'
+            }
+        },
+        hidePostalCode: true
+    });
+
+    card.mount('#card-element');
+
+    const cardErrors = document.getElementById('card-errors');
+    const submitButton = document.getElementById('submit-payment');
+    const buttonText = document.getElementById('button-text');
+    const spinner = document.getElementById('spinner');
+    const cardPaymentForm = document.getElementById('card-payment-form');
+    const onspotPaymentForm = document.getElementById('onspot-payment-form');
+    const cardPaymentMethod = document.getElementById('card-payment');
+    const onspotPaymentMethod = document.getElementById('onspot-payment');
+
+    let selectedPaymentMethod = 'card';
+
+    cardPaymentMethod.addEventListener('click', () => {
+        selectedPaymentMethod = 'card';
+        cardPaymentMethod.classList.add('selected');
+        onspotPaymentMethod.classList.remove('selected');
+        cardPaymentForm.style.display = 'block';
+        onspotPaymentForm.style.display = 'none';
+        submitButton.disabled = false;
+    });
+
+    onspotPaymentMethod.addEventListener('click', () => {
+        selectedPaymentMethod = 'onspot';
+        onspotPaymentMethod.classList.add('selected');
+        cardPaymentMethod.classList.remove('selected');
+        cardPaymentForm.style.display = 'none';
+        onspotPaymentForm.style.display = 'block';
+        submitButton.disabled = false;
+    });
+
+    card.addEventListener('change', ({error, complete}) => {
+        if (error) {
+            cardErrors.textContent = error.message;
+            submitButton.disabled = true;
+        } else {
+            cardErrors.textContent = '';
+            submitButton.disabled = !complete;
+        }
+    });
+
+    submitButton.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        if (selectedPaymentMethod === 'onspot') {
+            // Handle on-spot payment
+            submitButton.disabled = true;
+            buttonText.textContent = 'Processing...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/process_onspot_payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        event_id: '{{ event_id }}',
+                        amount: '{{ amount }}',
+                        currency: '{{ currency }}'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = result.redirect_url;
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                cardErrors.textContent = error.message;
+                submitButton.disabled = false;
+                buttonText.textContent = 'Pay Now';
+                spinner.classList.add('hidden');
+            }
+        } else {
+            // Handle card payment
+            submitButton.disabled = true;
+            buttonText.textContent = 'Processing...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const {paymentIntent, error} = await stripe.confirmCardPayment(
+                    '{{ client_secret }}',
+                    {
+                        payment_method: {
+                            card: card,
+                            billing_details: {
+                                name: '{{ attendee_name }}',
+                                email: '{{ attendee_email }}'
+                            }
+                        }
+                    }
+                );
+
+                if (error) {
+                    throw error;
+                }
+
+                if (paymentIntent.status === 'succeeded') {
+                    window.location.href = '{{ success_url }}';
+                }
+            } catch (error) {
+                cardErrors.textContent = error.message;
+                submitButton.disabled = false;
+                buttonText.textContent = 'Pay Now';
+                spinner.classList.add('hidden');
+            }
+        }
+    });
+</script>
+{% endblock %} 

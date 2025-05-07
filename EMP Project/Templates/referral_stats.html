@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Referral Statistics - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Referral Statistics</h2>
+            <p class="text-muted">Event: {{ event.title }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Total Referrals -->
+        <div class="col-md-6 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5>Total Referrals</h5>
+                    <h2>{{ total_referrals }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Referrers -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Top Referrers</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_referrers %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Referrals</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for referrer in top_referrers %}
+                                <tr>
+                                    <td>{{ referrer.name }}</td>
+                                    <td>{{ referrer.referral_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No referral data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Referral Program Details</h5>
+                </div>
+                <div class="card-body">
+                    <h6>How It Works</h6>
+                    <ol>
+                        <li>Attendees receive a unique referral link after registration</li>
+                        <li>They can share this link with friends and colleagues</li>
+                        <li>When someone registers using their link, it's tracked in the system</li>
+                        <li>Both the referrer and the new attendee may receive benefits</li>
+                    </ol>
+
+                    <h6>Current Benefits</h6>
+                    <ul>
+                        <li>Referrers: 10% discount on next event registration</li>
+                        <li>Referred Attendees: 5% discount on current registration</li>
+                    </ul>
+
+                    <div class="alert alert-info">
+                        <h6>Best Practices</h6>
+                        <ul class="mb-0">
+                            <li>Encourage attendees to share on social media</li>
+                            <li>Consider offering special rewards for top referrers</li>
+                            <li>Monitor referral patterns to optimize the program</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{{ url_for('manage_promo_codes', event_id=event.id) }}" class="btn btn-info">Manage Promo Codes</a>
+            <a href="{{ url_for('view_event', event_id=event.id) }}" class="btn btn-secondary">Back to Event</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

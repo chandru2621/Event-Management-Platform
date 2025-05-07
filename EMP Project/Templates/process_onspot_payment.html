@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}On-Spot Payment Instructions{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">On-Spot Payment Instructions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="event-details mb-4">
+                        <h4>Event Details</h4>
+                        <p><strong>Event:</strong> {{ event.title }}</p>
+                        <p><strong>Date:</strong> {{ event.start_time.strftime('%B %d, %Y') }}</p>
+                        <p><strong>Time:</strong> {{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}</p>
+                        <p><strong>Venue:</strong> {{ event.venue }}</p>
+                    </div>
+
+                    <div class="attendee-details mb-4">
+                        <h4>Your Information</h4>
+                        <p><strong>Name:</strong> {{ attendee_data.name }}</p>
+                        <p><strong>Email:</strong> {{ attendee_data.email }}</p>
+                        <p><strong>Phone:</strong> {{ attendee_data.phone }}</p>
+                        <p><strong>Company:</strong> {{ attendee_data.company }}</p>
+                    </div>
+
+                    <div class="payment-instructions mb-4">
+                        <h4>Payment Instructions</h4>
+                        <div class="alert alert-info">
+                            <h5>Please follow these steps to complete your registration:</h5>
+                            <ol>
+                                <li>Arrive at the venue 30 minutes before the event</li>
+                                <li>Bring a valid government-issued ID</li>
+                                <li>Show this confirmation page or the email you received</li>
+                                <li>Pay the amount of ${{ "%.2f"|format(attendee_data.final_price) }} at the registration desk</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('view_event', event_id=event.id) }}" class="btn btn-primary">
+                            Return to Event Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

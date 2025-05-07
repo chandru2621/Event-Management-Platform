@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block title %}Register for {{ event.title }}{% endblock %}
+
+{% block styles %}
+<style>
+    .registration-container {
+        padding: 2rem 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+
+    .registration-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .registration-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .registration-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 1rem;
+    }
+
+    .registration-form {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .ticket-options {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .ticket-option {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ticket-option:hover {
+        border-color: #4299e1;
+        transform: translateY(-2px);
+    }
+
+    .ticket-option.selected {
+        border-color: #4299e1;
+        background: #ebf8ff;
+    }
+
+    .ticket-info {
+        flex-grow: 1;
+    }
+
+    .ticket-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #2d3748;
+    }
+
+    .ticket-price {
+        color: #4a5568;
+        margin-top: 0.25rem;
+    }
+
+    .ticket-quantity {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .quantity-btn {
+        background: #e2e8f0;
+        border: none;
+        border-radius: 6px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .quantity-btn:hover {
+        background: #cbd5e0;
+    }
+
+    .quantity-input {
+        width: 50px;
+        text-align: center;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.25rem;
+    }
+
+    .payment-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .payment-section h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 1rem;
+    }
+
+    .payment-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .payment-option:hover {
+        border-color: #4299e1;
+    }
+
+    .payment-option input[type="radio"] {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .payment-option i {
+        font-size: 1.5rem;
+        color: #4a5568;
+    }
+
+    .btn-register {
+        background: linear-gradient(45deg, #4299e1, #667eea);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 2rem;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
+    }
+
+    .error-message {
+        color: #e53e3e;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 640px) {
+        .registration-card {
+            padding: 1.5rem;
+        }
+
+        .registration-header h1 {
+            font-size: 2rem;
+        }
+
+        .payment-options {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <div class="registration-card">
+        <div class="registration-header">
+            <h1>Register for {{ event.title }}</h1>
+            <p class="text-muted">Please fill in your details to complete the registration</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('register_attendee', event_id=event.id) }}" class="registration-form">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone">
+            </div>
+
+            <div class="form-group">
+                <label for="company">Company/Organization</label>
+                <input type="text" class="form-control" id="company" name="company">
+            </div>
+
+            <div class="form-group">
+                <label>Select Ticket Type *</label>
+                <div class="ticket-options">
+                    {% for ticket in ticket_types %}
+                    <div class="ticket-option" data-ticket-id="{{ ticket.id }}">
+                        <div class="ticket-info">
+                            <div class="ticket-name">{{ ticket.name }}</div>
+                            <div class="ticket-price">${{ "%.2f"|format(ticket.price) }}</div>
+                            <div class="ticket-availability">{{ ticket.available }} tickets remaining</div>
+                        </div>
+                        <div class="ticket-quantity">
+                            <button type="button" class="quantity-btn minus">-</button>
+                            <input type="number" class="quantity-input" name="quantity" value="0" min="0" max="{{ ticket.available }}">
+                            <button type="button" class="quantity-btn plus">+</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="payment-section">
+                <h3>Select Payment Method *</h3>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="card" required>
+                        <i class="fas fa-credit-card"></i>
+                        <span>Credit Card</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="onspot" required>
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Pay at Event</span>
+                    </label>
+                </div>
+            </div>
+
+            <input type="hidden" name="ticket_type" id="selected_ticket_type" required>
+            <button type="submit" class="btn-register">Complete Registration</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ticketOptions = document.querySelectorAll('.ticket-option');
+    const selectedTicketInput = document.getElementById('selected_ticket_type');
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    const minusButtons = document.querySelectorAll('.minus');
+    const plusButtons = document.querySelectorAll('.plus');
+    const form = document.querySelector('form');
+
+    // Handle ticket selection
+    ticketOptions.forEach(option => {
+        const quantityInput = option.querySelector('.quantity-input');
+        const minusBtn = option.querySelector('.minus');
+        const plusBtn = option.querySelector('.plus');
+        const ticketId = option.dataset.ticketId;
+        const maxQuantity = parseInt(quantityInput.max);
+
+        minusBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            if (value > 0) {
+                quantityInput.value = value - 1;
+                if (value - 1 === 0) {
+                    option.classList.remove('selected');
+                }
+            }
+            updateSelectedTicket();
+        });
+
+        plusBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            if (value < maxQuantity) {
+                quantityInput.value = value + 1;
+                if (value + 1 > 0) {
+                    option.classList.add('selected');
+                }
+            }
+            updateSelectedTicket();
+        });
+
+        quantityInput.addEventListener('change', () => {
+            let value = parseInt(quantityInput.value);
+            if (value > maxQuantity) {
+                quantityInput.value = maxQuantity;
+                value = maxQuantity;
+            }
+            if (value < 0) {
+                quantityInput.value = 0;
+                value = 0;
+            }
+            option.classList.toggle('selected', value > 0);
+            updateSelectedTicket();
+        });
+    });
+
+    function updateSelectedTicket() {
+        const selectedOption = Array.from(ticketOptions).find(option => {
+            const quantity = parseInt(option.querySelector('.quantity-input').value);
+            return quantity > 0;
+        });
+
+        if (selectedOption) {
+            selectedTicketInput.value = selectedOption.dataset.ticketId;
+        } else {
+            selectedTicketInput.value = '';
+        }
+    }
+
+    // Form validation
+    form.addEventListener('submit', (e) => {
+        const selectedTicket = selectedTicketInput.value;
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        
+        if (!selectedTicket) {
+            e.preventDefault();
+            alert('Please select a ticket type and quantity');
+            return;
+        }
+        
+        if (!paymentMethod) {
+            e.preventDefault();
+            alert('Please select a payment method');
+            return;
+        }
+        
+        // Validate quantity
+        const selectedOption = document.querySelector(`.ticket-option[data-ticket-id="${selectedTicket}"]`);
+        const quantity = parseInt(selectedOption.querySelector('.quantity-input').value);
+        
+        if (quantity <= 0) {
+            e.preventDefault();
+            alert('Please select at least one ticket');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

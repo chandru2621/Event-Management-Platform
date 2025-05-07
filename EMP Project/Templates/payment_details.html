@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Details - {{ event.title }}{% endblock %}
+
+{% block styles %}
+<style>
+    .payment-container {
+        padding: 2rem 0;
+        perspective: 2000px;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+        animation: fadeInUp 0.6s ease;
+        animation-fill-mode: both;
+        will-change: transform;
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .payment-card:hover {
+        transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .payment-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        transform-style: preserve-3d;
+        animation: fadeInDown 1s ease;
+        padding: 0 1rem;
+    }
+
+    .payment-header h1 {
+        font-size: clamp(2rem, 5vw, 2.5rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #00ff88, #00b8ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: fadeInUp 1s ease;
+        transform: translateZ(100px);
+        text-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        letter-spacing: 2px;
+        line-height: 1.2;
+    }
+
+    .payment-form {
+        padding: 2rem;
+        transform-style: preserve-3d;
+    }
+
+    .card-element-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+        margin: 1.5rem 0;
+        transform: translateZ(30px);
+        transition: all 0.3s ease;
+        border: 2px solid #e2e8f0;
+    }
+
+    .card-element-container:hover {
+        transform: translateZ(40px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    #card-element {
+        padding: 1.2rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        background: white;
+        font-size: 1.1rem;
+        color: #2d2d2d;
+        min-height: 60px;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #card-element:focus {
+        border-color: #00b8ff;
+        box-shadow: 0 0 0 4px rgba(0, 184, 255, 0.15);
+        outline: none;
+    }
+
+    .payment-summary {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        transform: translateZ(20px);
+        border: 1px solid #e2e8f0;
+    }
+
+    .payment-summary h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #2d3748;
+    }
+
+    .summary-details {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        color: #718096;
+    }
+
+    .summary-value {
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .btn-pay {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: linear-gradient(45deg, #00ff88, #00b8ff);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        transform: translateZ(40px);
+        margin-top: 2rem;
+    }
+
+    .btn-pay:hover {
+        transform: translateY(-2px) translateZ(50px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-pay:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .error-message {
+        color: #dc3545;
+        background: rgba(220, 53, 69, 0.1);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+        text-align: center;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    .spinner-border {
+        width: 1.8rem;
+        height: 1.8rem;
+        margin-left: 0.8rem;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .payment-container {
+            padding: 1rem;
+        }
+
+        .payment-form {
+            padding: 1rem;
+        }
+
+        .card-element-container {
+            padding: 1rem;
+        }
+
+        #card-element {
+            min-height: 50px;
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-header">
+        <h1>Payment Details</h1>
+        <p>Complete your payment securely</p>
+    </div>
+
+    <div class="payment-card">
+        <form id="payment-form" class="payment-form">
+            <div class="payment-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-details">
+                    <div class="summary-item">
+                        <span class="summary-label">Event:</span>
+                        <span class="summary-value">{{ event.title }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Date:</span>
+                        <span class="summary-value">{{ event.start_time.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Time:</span>
+                        <span class="summary-value">{{ event.start_time.strftime('%I:%M %p') }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Venue:</span>
+                        <span class="summary-value">{{ event.venue }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Price per ticket:</span>
+                        <span class="summary-value">${{ "%.2f"|format(event.price) }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Quantity:</span>
+                        <span class="summary-value" id="ticketQuantity">{{ quantity }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Amount:</span>
+                        <span class="summary-value" id="totalAmount">${{ "%.2f"|format(total_amount) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-element-container">
+                <label for="card-element" class="form-label">Credit or Debit Card</label>
+                <div id="card-element"></div>
+            </div>
+
+            <div id="card-errors" role="alert"></div>
+
+            <button type="submit" class="btn-pay" id="submit-button">
+                <span id="button-text">Pay ${{ "%.2f"|format(total_amount) }}</span>
+                <div id="spinner" class="spinner-border spinner-border-sm d-none" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </button>
+        </form>
+    </div>
+</div>
+
+{% block scripts %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Get registration data from session storage
+    const registrationData = JSON.parse(sessionStorage.getItem('registrationData') || '{}');
+    
+    // Initialize Stripe with proper error handling
+    let stripe;
+    try {
+        stripe = Stripe('{{ stripe_public_key }}');
+        if (!stripe) {
+            throw new Error('Failed to initialize Stripe');
+        }
+    } catch (error) {
+        console.error('Stripe initialization error:', error);
+        document.getElementById('card-errors').textContent = 'Payment system is currently unavailable. Please try again later.';
+        document.getElementById('card-errors').classList.add('error-message');
+        document.getElementById('submit-button').disabled = true;
+    }
+
+    // Only proceed with Stripe setup if initialization was successful
+    if (stripe) {
+        const elements = stripe.elements();
+
+        // Create card element with enhanced styling
+        const card = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#32325d',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    },
+                    ':-webkit-autofill': {
+                        color: '#32325d'
+                    }
+                },
+                invalid: {
+                    color: '#dc3545',
+                    iconColor: '#dc3545'
+                }
+            }
+        });
+
+        // Mount card element
+        card.mount('#card-element');
+
+        // Form elements
+        const form = document.getElementById('payment-form');
+        const submitButton = document.getElementById('submit-button');
+        const spinner = document.getElementById('spinner');
+        const buttonText = document.getElementById('button-text');
+        const cardErrors = document.getElementById('card-errors');
+
+        // Handle card validation
+        card.addEventListener('change', function(event) {
+            if (event.error) {
+                cardErrors.textContent = event.error.message;
+                cardErrors.classList.add('error-message');
+                submitButton.disabled = true;
+            } else {
+                cardErrors.textContent = '';
+                cardErrors.classList.remove('error-message');
+                submitButton.disabled = false;
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Validate registration data
+            if (!registrationData || !registrationData.event_id) {
+                cardErrors.textContent = 'Registration data is missing. Please try registering again.';
+                cardErrors.classList.add('error-message');
+                return;
+            }
+
+            // Disable form and show loading state
+            submitButton.disabled = true;
+            spinner.classList.remove('d-none');
+            buttonText.textContent = 'Processing Payment...';
+
+            // Create payment intent
+            fetch('/create-payment-intent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    event_id: registrationData.event_id,
+                    quantity: parseInt(registrationData.quantity),
+                    amount: parseFloat(registrationData.total_amount) * 100, // Convert to cents
+                    name: registrationData.name,
+                    email: registrationData.email,
+                    phone: registrationData.phone
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                return data;
+            })
+            .then(data => {
+                // Confirm card payment
+                return stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: card,
+                        billing_details: {
+                            name: registrationData.name,
+                            email: registrationData.email,
+                            phone: registrationData.phone
+                        }
+                    }
+                });
+            })
+            .then(result => {
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+                // Clear session storage
+                sessionStorage.removeItem('registrationData');
+                // Success - redirect to success page
+                window.location.href = "{{ url_for('registration_success', event_id=event.id) }}";
+            })
+            .catch(error => {
+                // Handle errors
+                console.error('Payment error:', error);
+                cardErrors.textContent = error.message || 'An error occurred while processing your payment. Please try again.';
+                cardErrors.classList.add('error-message');
+                submitButton.disabled = false;
+                spinner.classList.add('d-none');
+                buttonText.textContent = 'Pay ${{ "%.2f"|format(total_amount) }}';
+            });
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %} 

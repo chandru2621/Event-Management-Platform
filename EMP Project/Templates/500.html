@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <h1>500 - Server Error</h1>
+    <p>We're sorry, but something went wrong on our end.</p>
+    <p>Our team has been notified and we're working to fix the issue.</p>
+    
+    {% if error and config.DEBUG %}
+    <div class="error-details">
+        <h3>Error Details (Development Mode Only):</h3>
+        <pre>{{ error }}</pre>
+    </div>
+    {% endif %}
+    
+    <div class="error-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Home</a>
+        <button onclick="window.location.reload()" class="btn btn-secondary">Try Again</button>
+    </div>
+</div>
+
+<style>
+.error-container {
+    text-align: center;
+    padding: 50px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.error-container h1 {
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.error-details {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.error-details pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #dc3545;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.error-actions {
+    margin-top: 30px;
+}
+
+.error-actions .btn {
+    margin: 0 10px;
+    padding: 10px 20px;
+}
+</style>
+{% endblock %} 

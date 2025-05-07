@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Attendees - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Manage Attendees</h2>
+            <p class="text-muted">Event: {{ event.title }}</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Attendee Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('export_attendees', event_id=event.id) }}" class="btn btn-success">
+                            <i class="bi bi-download"></i> Export Attendees
+                        </a>
+                        <a href="{{ url_for('email_attendees', event_id=event.id) }}" class="btn btn-info">
+                            <i class="bi bi-envelope"></i> Email Attendees
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Attendee List</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Ticket Type</th>
+                                    <th>Status</th>
+                                    <th>Registration Date</th>
+                                    <th>Check-in Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attendee in attendees %}
+                                <tr>
+                                    <td>{{ attendee.name }}</td>
+                                    <td>{{ attendee.email }}</td>
+                                    <td>{{ attendee.ticket_type.name }}</td>
+                                    <td>
+                                        <span class="badge {% if attendee.status == 'registered' %}bg-success{% elif attendee.status == 'waitlisted' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ attendee.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ attendee.registration_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        {% if attendee.checked_in %}
+                                        <span class="badge bg-success">
+                                            Checked In ({{ attendee.check_in_time.strftime('%H:%M') }})
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Not Checked In</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if not attendee.checked_in %}
+                                        <button class="btn btn-sm btn-primary check-in-btn" 
+                                                data-attendee-id="{{ attendee.id }}"
+                                                data-event-id="{{ event.id }}">
+                                            Check In
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{{ url_for('view_event', event_id=event.id) }}" class="btn btn-secondary">Back to Event</a>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkInButtons = document.querySelectorAll('.check-in-btn');
+    
+    checkInButtons.forEach(button => {
+        button.addEventListener('click', async function() {
+            const attendeeId = this.dataset.attendeeId;
+            const eventId = this.dataset.eventId;
+            
+            try {
+                const response = await fetch(`/event/${eventId}/attendee/${attendeeId}/check-in`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    // Reload the page to show updated check-in status
+                    window.location.reload();
+                } else {
+                    alert('Error checking in attendee');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error checking in attendee');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

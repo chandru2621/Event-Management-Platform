@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Promo Codes - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Manage Promo Codes</h2>
+            <p class="text-muted">Event: {{ event.title }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Create New Promo Code -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Create New Promo Code</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="discount" class="form-label">Discount Percentage</label>
+                            <input type="number" class="form-control" id="discount" name="discount" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="max_uses" class="form-label">Maximum Uses (Optional)</label>
+                            <input type="number" class="form-control" id="max_uses" name="max_uses" min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="valid_from" class="form-label">Valid From</label>
+                            <input type="datetime-local" class="form-control" id="valid_from" name="valid_from" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valid_until" class="form-label">Valid Until</label>
+                            <input type="datetime-local" class="form-control" id="valid_until" name="valid_until" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate Promo Code</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Promo Codes -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Active Promo Codes</h5>
+                </div>
+                <div class="card-body">
+                    {% if event.promo_codes %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Uses</th>
+                                    <th>Valid Until</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for promo in event.promo_codes %}
+                                <tr>
+                                    <td><code>{{ promo.code }}</code></td>
+                                    <td>{{ promo.discount_percent }}%</td>
+                                    <td>
+                                        {% if promo.max_uses %}
+                                        {{ promo.current_uses }}/{{ promo.max_uses }}
+                                        {% else %}
+                                        {{ promo.current_uses }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ promo.valid_until.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No active promo codes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Share Event</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Event URL</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="{{ url_for('view_event', event_id=event.id, _external=True) }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Share on Social Media</label>
+                        <div class="btn-group" role="group">
+                            <a href="https://twitter.com/intent/tweet?url={{ url_for('view_event', event_id=event.id, _external=True) }}&text=Check out this event: {{ event.title }}" 
+                               class="btn btn-outline-primary" target="_blank">
+                                <i class="bi bi-twitter"></i> Twitter
+                            </a>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ url_for('view_event', event_id=event.id, _external=True) }}" 
+                               class="btn btn-outline-primary" target="_blank">
+                                <i class="bi bi-facebook"></i> Facebook
+                            </a>
+                            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ url_for('view_event', event_id=event.id, _external=True) }}&title={{ event.title }}" 
+                               class="btn btn-outline-primary" target="_blank">
+                                <i class="bi bi-linkedin"></i> LinkedIn
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{{ url_for('referral_stats', event_id=event.id) }}" class="btn btn-info">View Referral Statistics</a>
+            <a href="{{ url_for('view_event', event_id=event.id) }}" class="btn btn-secondary">Back to Event</a>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+function copyToClipboard(button) {
+    const input = button.parentElement.querySelector('input');
+    input.select();
+    document.execCommand('copy');
+    button.textContent = 'Copied!';
+    setTimeout(() => {
+        button.textContent = 'Copy';
+    }, 2000);
+}
+</script>
+{% endblock %}
+{% endblock %} 
